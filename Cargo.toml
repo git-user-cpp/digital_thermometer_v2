@@ -1,5 +1,5 @@
 [package]
-name = "stm32f446ret_blinky"
+name = "digital_thermometer"
 version = "0.1.0"
 edition = "2024"
 
@@ -15,7 +15,7 @@ debug = false
 lto = true
 
 [[bin]]
-name = "blinky"
+name = "hum_temp_sensor"
 path = "src/main.rs"
 test = false
 bench = false
