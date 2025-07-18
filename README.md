@@ -6,9 +6,9 @@ digital thermomether for stm32f446ret written in Rust
 ## How to use
 
 1. cargo build --release --target thumbv7em-none-eabihf
-2. arm-none-eabi-objcopy -O ihex target/thumbv7em-none-eabihf/release/blinky target/thumbv7em-none-eabihf/release/blinky.hex
-3. flash the device using stmCubeProgrammer
-4. done
+2. arm-none-eabi-objcopy -O ihex target/thumbv7em-none-eabihf/release/hum_temp_sensor target/thumbv7em-none-eabihf/release/hum_temp_sensor.hex
+3. flash the device using stmCubeProgrammer and created .hex file
+4. press reset button. done.
 
 ---
 
