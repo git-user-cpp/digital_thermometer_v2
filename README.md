@@ -3,6 +3,15 @@ digital thermomether for stm32f446ret written in Rust
 
 ---
 
+## How to use
+
+1. cargo build --release --target thumbv7em-none-eabihf
+2. arm-none-eabi-objcopy -O ihex target/thumbv7em-none-eabihf/release/blinky target/thumbv7em-none-eabihf/release/blinky.hex
+3. flash the device using stmCubeProgrammer
+4. done
+
+---
+
 ## ⚠️ LICENSE ⚠️
 
     stm32f446ret_blinky
