@@ -36,7 +36,6 @@ pub fn run_bl() {
         .unwrap();
 
         let mut sensor_data = Aht20Data::new();
-
         let mut delay = Delay::new(cortex_peripherals.SYST, clocks.sysclk().to_Hz());
 
         /*
@@ -49,22 +48,10 @@ pub fn run_bl() {
         */
 
         aht20_init(&mut sensor_data, &mut i2c, &mut serial, &mut delay);
-
         aht20_measure(&mut sensor_data, &mut i2c, &mut serial, &mut delay);
         
         loop {
-            // match i2c.read(address, &mut buffer) {
-            //     Ok(_) => {
-            //         // Send data over UART
-            //         for &byte in buffer.iter() {
-            //             let _ = serial.write(byte);
-            //         }
-            //     }
-            //     Err(_e) => {
-            //         // Handle I2C read error (e.g., send error message over UART)
-            //         let _ = serial.write_str("I2C Error\n");
-            //     }
-            // }
+            
         }
     }
 }
