@@ -1,4 +1,4 @@
-// Convert byte to hex string (e.g., 0x08 -> "08")
+/// Converts byte to hex string (e.g., 0x08 -> "08")
 pub fn byte_to_hex(byte: u8) -> [u8; 2] {
     let hex_chars = b"0123456789ABCDEF";
     let high_nibble = (byte >> 4) & 0x0F;
@@ -7,4 +7,9 @@ pub fn byte_to_hex(byte: u8) -> [u8; 2] {
         hex_chars[high_nibble as usize],
         hex_chars[low_nibble as usize],
     ]
+}
+
+/// Converts byte to decimal string (e.g., 123 -> "123", 8 -> "8")
+pub fn float_to_str(num: f32) -> &'static str {
+    todo!()
 }

@@ -1,3 +1,4 @@
+/// Holds essential AHT20 commands
 pub enum Aht20Commands {
     CheckCalibration([u8; 1]),
     Calibrate([u8; 3]),

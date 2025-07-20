@@ -1,3 +1,4 @@
+/// Holds data for AHT20 sensor
 pub struct Aht20Data {
     pub device_address: u8,
     pub measured_data: [u8; 7],
@@ -7,6 +8,7 @@ pub struct Aht20Data {
 }
 
 impl Aht20Data {
+    /// Creates new instance and initializes it's device address
     pub fn new() -> Self {
         Self {
             device_address: 0x38,

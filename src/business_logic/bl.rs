@@ -7,8 +7,12 @@ use hal::{
 use panic_halt as _;
 use stm32f4xx_hal as hal;
 
-use crate::aht20::{aht20_functionality::{aht20_init, aht20_measure}, aht20_struct::Aht20Data};
+use crate::aht20::{
+    aht20_functionality::{aht20_init, aht20_measure},
+    aht20_struct::Aht20Data,
+};
 
+/// runs AHT20 sensor business logic
 pub fn run_bl() {
     if let (Some(peripherals), Some(cortex_peripherals)) =
         (hal::pac::Peripherals::take(), cortex_m::Peripherals::take())
@@ -49,9 +53,7 @@ pub fn run_bl() {
 
         aht20_init(&mut sensor_data, &mut i2c, &mut serial, &mut delay);
         aht20_measure(&mut sensor_data, &mut i2c, &mut serial, &mut delay);
-        
-        loop {
-            
-        }
+
+        loop {}
     }
 }
