@@ -3,6 +3,16 @@ digital thermomether for stm32f446ret written in Rust
 
 ---
 
+![GitHub Release](https://img.shields.io/github/v/release/git-user-cpp/digital_thermometer_v2?style=flat-square&logo=github)
+![GitHub Repo stars](https://img.shields.io/github/stars/git-user-cpp/digital_thermometer_v2?style=flat-square&logo=github)
+
+![GitHub contributors](https://img.shields.io/github/contributors-anon/git-user-cpp/digital_thermometer_v2?style=flat-square&logo=github) ![GitHub last commit](https://img.shields.io/github/last-commit/git-user-cpp/digital_thermometer_v2?style=flat-square&logo=github)
+
+![GitHub License](https://img.shields.io/github/license/git-user-cpp/digital_thermometer_v2?style=flat-square&logo=github)
+
+
+---
+
 ## How to use
 
 1. cargo build --release --target thumbv7em-none-eabihf
@@ -14,8 +24,8 @@ digital thermomether for stm32f446ret written in Rust
 
 ## ⚠️ LICENSE ⚠️
 
-    stm32f446ret_blinky
-    sipmle diode blink for stm32f446ret written in Rust
+    digital_thermometer_v2
+    digital thermomether for stm32f446ret written in Rust 
     Copyright (C) 2025  Andrew Kushyk
    
     This program is free software: you can redistribute it and/or modify
