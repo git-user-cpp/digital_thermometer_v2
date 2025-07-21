@@ -27,7 +27,7 @@ use panic_halt as _;
 use stm32f4xx_hal as hal;
 
 use crate::aht20::{
-    aht20_functionality::{aht20_init, aht20_measure},
+    aht20_functionality::{aht20_init, aht20_measure, aht20_uart_transmit_data},
     aht20_struct::Aht20Data,
 };
 
@@ -72,6 +72,7 @@ pub fn run_bl() {
 
         aht20_init(&mut sensor_data, &mut i2c, &mut serial, &mut delay);
         aht20_measure(&mut sensor_data, &mut i2c, &mut serial, &mut delay);
+        aht20_uart_transmit_data(&mut sensor_data, &mut serial);
 
         loop {}
     }
