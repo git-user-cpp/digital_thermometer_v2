@@ -1,6 +1,6 @@
 /*
  * digital_thermometer_v2
- * digital thermomether for stm32f446ret written in Rust 
+ * digital thermomether for stm32f446ret written in Rust
  * Copyright (C) 2025  Andrew Kushyk
  *
  * This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,33 @@ pub fn byte_to_hex(byte: u8) -> [u8; 2] {
     ]
 }
 
-/// Converts byte to decimal string (e.g., 123 -> "123", 8 -> "8")
+/// Converts float to string(e.g., 12.13 -> "1213", 08.00 -> "0800")
 pub fn float_to_str(num: f32) -> &'static str {
-    todo!()
+    // Multiply by 100 to shift two decimal places (e.g., 12.13 -> 1213.0)
+    let scaled = (num * 100.0) as i32;
+
+    // Handle negative numbers or out-of-range values
+    if scaled < 0 || scaled > 9999 {
+        return "0000"; // Fallback for invalid inputs
+    }
+
+    // Create a local buffer for digits
+    let mut buffer = [b'0'; 4];
+    let digits = scaled as u32;
+
+    // Format as four digits (e.g., 1213 -> "1213")
+    buffer[0] = b'0' + ((digits / 1000) % 10) as u8;
+    buffer[1] = b'0' + ((digits / 100) % 10) as u8;
+    buffer[2] = b'0' + ((digits / 10) % 10) as u8;
+    buffer[3] = b'0' + (digits % 10) as u8;
+
+    // Convert to &'static str using a static leak (safe in this context)
+    unsafe {
+        // Use a static array to store the result
+        static OUTPUT: [u8; 4] = [b'0'; 4];
+        // Copy to static memory (using raw pointers to avoid mutable static refs)
+        let output_ptr = OUTPUT.as_ptr() as *mut u8;
+        core::ptr::copy_nonoverlapping(buffer.as_ptr(), output_ptr, 4);
+        core::str::from_utf8_unchecked(&OUTPUT)
+    }
 }

@@ -1,6 +1,6 @@
 /*
  * digital_thermometer_v2
- * digital thermomether for stm32f446ret written in Rust 
+ * digital thermomether for stm32f446ret written in Rust
  * Copyright (C) 2025  Andrew Kushyk
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@ use hal::{
 use panic_halt as _;
 use stm32f4xx_hal::{self as hal};
 
-use crate::aht20::aht20_commands::Aht20Commands;
+use crate::{aht20::aht20_commands::Aht20Commands, utils::hex::float_to_str};
 use crate::aht20::aht20_struct::Aht20Data;
 
 /// Initializes AHT20 sensor
@@ -76,7 +76,7 @@ pub fn aht20_measure(
 
             match i2c.read(sensor_data.device_address, &mut sensor_data.measured_data) {
                 Ok(_) => {
-                    todo!()
+                    aht20_calculate_measurments(&mut sensor_data);
                 }
                 Err(_e) => {
                     let msg = "AHT20 Failed to get data\r\n";
@@ -93,7 +93,13 @@ pub fn aht20_measure(
 
 /// Transmits measured data via UART
 pub fn aht20_uart_transmit_data(sensor_data: &mut Aht20Data, serial: &mut Serial<USART2, u8>) {
-    todo!()
+    let _ = serial.write_str("Humidity: ");
+    let _ = serial.write_str(float_to_str(sensor_data.humidity));
+    let _ = serial.write_str(", C: ");
+    let _ = serial.write_str(float_to_str(sensor_data.temp_c));
+    let _ = serial.write_str(", F: ");
+    let _ = serial.write_str(float_to_str(sensor_data.temp_f));
+    let _ = serial.write_str("\r\n");
 }
 
 // Helper function for sensor calibration
