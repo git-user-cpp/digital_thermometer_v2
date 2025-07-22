@@ -25,7 +25,7 @@ use hal::{
     serial::Serial,
 };
 use panic_halt as _;
-use stm32f4xx_hal::{self as hal};
+use stm32f4xx_hal::{self as hal, uart::TxISR};
 
 use crate::aht20::aht20_struct::Aht20Data;
 use crate::{aht20::aht20_commands::Aht20Commands, utils::convert::float_to_uart};
@@ -78,7 +78,7 @@ pub fn aht20_measure(
                 Ok(_) => {
                     if sensor_data.measured_data[0] & 0x80 == 0 {
                         if aht20_check_crc(sensor_data) == sensor_data.measured_data[6] {
-                        aht20_calculate_measurments(&mut sensor_data);
+                            aht20_calculate_measurments(&mut sensor_data);
                         } else {
                             let msg = "AHT20 CRC check failed\r\n";
                             let _ = serial.write_str(msg);
@@ -90,7 +90,7 @@ pub fn aht20_measure(
                 }
                 Err(_e) => {
                     aht20_soft_reset(i2c, sensor_data, delay);
-                    let msg = "AHT20 Failed to get data\r\n";
+                    let msg = "AHT20 Failed to get data. Performing soft reset...\r\n";
                     let _ = serial.write_str(msg);
                 }
             }
@@ -104,19 +104,19 @@ pub fn aht20_measure(
 
 /// Transmits measured data via UART
 pub fn aht20_uart_transmit_data(sensor_data: &mut Aht20Data, serial: &mut Serial<USART2, u8>) {
-    let _ = serial.write_str("Humidity: ");
-    for el in float_to_uart(sensor_data.humidity) {
-        let _ = serial.write_char(el as char);
+    let parts = [
+        ("Humidity: ", float_to_uart(sensor_data.humidity)),
+        (", C: ", float_to_uart(sensor_data.temp_c)),
+        (", F: ", float_to_uart(sensor_data.temp_f)),
+        ("\r\n", [0; 6]),
+    ];
+    for (prefix, data) in parts.iter() {
+        let _ = serial.write_str(prefix);
+        for &byte in data.iter().filter(|&&b| b != 0) {
+            while !serial.is_tx_empty() {} // Wait for buffer to be ready
+            let _ = serial.write_char(byte as char);
+        }
     }
-    let _ = serial.write_str(", C: ");
-    for el in float_to_uart(sensor_data.temp_c) {
-        let _ = serial.write_char(el as char);
-    }
-    let _ = serial.write_str(", F: ");
-    for el in float_to_uart(sensor_data.temp_f) {
-        let _ = serial.write_char(el as char);
-    }
-    let _ = serial.write_str("\r\n");
 }
 
 // Helper function for sensor calibration
@@ -158,11 +158,9 @@ fn aht20_calculate_measurments(sensor_data: &mut Aht20Data) {
 
 // Helper function for sensor soft reset
 fn aht20_soft_reset(i2c: &mut I2c<I2C1>, sensor_data: &mut Aht20Data, delay: &mut Delay) {
-    for _ in 0..3 {
-        let soft_reset_cmd = [0xBA];
-        let _ = i2c.write(sensor_data.device_address, &soft_reset_cmd);
-        delay.delay_ms(20_u32);
-    }
+    let soft_reset_cmd = [0xBA];
+    let _ = i2c.write(sensor_data.device_address, &soft_reset_cmd);
+    delay.delay_ms(20_u32);
 }
 
 // Helper function for checking crc
