@@ -75,7 +75,7 @@ pub fn run_bl() {
         loop {
             aht20_measure(&mut sensor_data, &mut i2c, &mut serial, &mut delay);
             aht20_uart_transmit_data(&mut sensor_data, &mut serial);
-            delay.delay_ms(1000);
+            delay.delay_ms(2000);
         }
     }
 }
