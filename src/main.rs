@@ -1,6 +1,6 @@
 /*
  * digital_thermometer_v2
- * digital thermomether for stm32f446ret written in Rust 
+ * digital thermomether for stm32f446ret written in Rust
  * Copyright (C) 2025  Andrew Kushyk
  *
  * This program is free software: you can redistribute it and/or modify
@@ -20,12 +20,11 @@
 #![no_main]
 #![no_std]
 
-use cortex_m_rt as rt;
-
 mod aht20;
 mod business_logic;
 mod utils;
 use business_logic::bl::run_bl;
+use cortex_m_rt as rt;
 
 #[rt::entry]
 fn main() -> ! {

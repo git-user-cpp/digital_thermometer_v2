@@ -1,6 +1,6 @@
 /*
  * digital_thermometer_v2
- * digital thermomether for stm32f446ret written in Rust 
+ * digital thermomether for stm32f446ret written in Rust
  * Copyright (C) 2025  Andrew Kushyk
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,8 +27,8 @@ use hal::{
 use panic_halt as _;
 use stm32f4xx_hal::{self as hal};
 
-use crate::aht20::aht20_commands::Aht20Commands;
 use crate::aht20::aht20_struct::Aht20Data;
+use crate::{aht20::aht20_commands::Aht20Commands, utils::convert::float_to_uart};
 
 /// Initializes AHT20 sensor
 pub fn aht20_init(
@@ -76,9 +76,15 @@ pub fn aht20_measure(
 
             match i2c.read(sensor_data.device_address, &mut sensor_data.measured_data) {
                 Ok(_) => {
-                    todo!()
+                    if sensor_data.measured_data[0] & 0x80 == 0 {
+                        aht20_calculate_measurments(&mut sensor_data);
+                    } else {
+                        let msg = "AHT20 Busy\r\n";
+                        let _ = serial.write_str(msg);
+                    };
                 }
                 Err(_e) => {
+                    aht20_soft_reset(i2c, sensor_data, delay);
                     let msg = "AHT20 Failed to get data\r\n";
                     let _ = serial.write_str(msg);
                 }
@@ -93,7 +99,19 @@ pub fn aht20_measure(
 
 /// Transmits measured data via UART
 pub fn aht20_uart_transmit_data(sensor_data: &mut Aht20Data, serial: &mut Serial<USART2, u8>) {
-    todo!()
+    let _ = serial.write_str("Humidity: ");
+    for el in float_to_uart(sensor_data.humidity) {
+        let _ = serial.write_char(el as char);
+    }
+    let _ = serial.write_str(", C: ");
+    for el in float_to_uart(sensor_data.temp_c) {
+        let _ = serial.write_char(el as char);
+    }
+    let _ = serial.write_str(", F: ");
+    for el in float_to_uart(sensor_data.temp_f) {
+        let _ = serial.write_char(el as char);
+    }
+    let _ = serial.write_str("\r\n");
 }
 
 // Helper function for sensor calibration
@@ -120,18 +138,24 @@ fn aht20_calibrate(
 }
 
 // Helper function for calculating measurments
-#[allow(arithmetic_overflow)]
 fn aht20_calculate_measurments(sensor_data: &mut Aht20Data) {
-    let raw_humidity: u32 = ((sensor_data.measured_data[1] << 12)
-        | (sensor_data.measured_data[2] << 4)
-        | (sensor_data.measured_data[3] >> 4))
-        .into();
-    let raw_temperature: u32 = (((sensor_data.measured_data[3] & 0x0F) << 16)
-        | (sensor_data.measured_data[4] << 8)
-        | (sensor_data.measured_data[5]))
-        .into();
+    let raw_humidity: u32 = ((sensor_data.measured_data[1] as u32) << 12)
+        | ((sensor_data.measured_data[2] as u32) << 4)
+        | ((sensor_data.measured_data[3] as u32) >> 4);
+    let raw_temperature: u32 = (((sensor_data.measured_data[3] as u32) & 0x0F) << 16)
+        | ((sensor_data.measured_data[4] as u32) << 8)
+        | (sensor_data.measured_data[5] as u32);
 
-    sensor_data.humidity = ((raw_humidity as f32) * 100.0) / 1048576.0;
-    sensor_data.temp_c = (((raw_temperature as f32) * 200.0) / 1048576.0) - 50.0;
+    sensor_data.humidity = (raw_humidity as f32 * 100.0) / 1048576.0;
+    sensor_data.temp_c = (raw_temperature as f32 * 200.0 / 1048576.0) - 50.0;
     sensor_data.temp_f = sensor_data.temp_c * 9.0 / 5.0 + 32.0;
+}
+
+// Helper function for sensor soft reset
+fn aht20_soft_reset(i2c: &mut I2c<I2C1>, sensor_data: &mut Aht20Data, delay: &mut Delay) {
+    for _ in 0..3 {
+        let soft_reset_cmd = [0xBA];
+        let _ = i2c.write(sensor_data.device_address, &soft_reset_cmd);
+        delay.delay_ms(20_u32);
+    }
 }
