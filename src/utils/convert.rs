@@ -17,32 +17,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/// Converts byte to hex string (e.g., 0x08 -> "08")
-pub fn byte_to_hex(byte: u8) -> [u8; 2] {
-    let hex_chars = b"0123456789ABCDEF";
-    let high_nibble = (byte >> 4) & 0x0F;
-    let low_nibble = byte & 0x0F;
-    [
-        hex_chars[high_nibble as usize],
-        hex_chars[low_nibble as usize],
-    ]
-}
-
-/// Converts float to string (e.g., 12.13 -> "12.13", 08.00 -> "08.00")
-pub fn float_to_str(num: f32) -> [u8; 5] {
+/// Converts float to bytes sequense to enable UART transmission
+pub fn float_to_uart(num: f32) -> [u8; 6] {
     let dec_chars = b"0123456789.";
-    let scaled = (num * 100.0) as u32;
+    let is_negative = num < 0.0;
+    let scaled = (num.abs() * 100.0) as u32;
     let tens = (scaled / 1000) % 10;
     let ones = (scaled / 100) % 10;
     let dec1 = (scaled / 10) % 10;
     let dec2 = scaled % 10;
     let period: u8 = 10;
 
-    [
-        dec_chars[tens as usize],
-        dec_chars[ones as usize],
-        dec_chars[period as usize],
-        dec_chars[dec1 as usize],
-        dec_chars[dec2 as usize],
-    ]
+    if is_negative {
+        [
+            b'-',
+            dec_chars[tens as usize],
+            dec_chars[ones as usize],
+            dec_chars[period as usize],
+            dec_chars[dec1 as usize],
+            dec_chars[dec2 as usize],
+        ]
+    } else {
+        [
+            dec_chars[tens as usize],
+            dec_chars[ones as usize],
+            dec_chars[period as usize],
+            dec_chars[dec1 as usize],
+            dec_chars[dec2 as usize],
+            0,
+        ]
+    }
 }

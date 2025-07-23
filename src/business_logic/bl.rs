@@ -36,18 +36,18 @@ pub fn run_bl() {
     if let (Some(peripherals), Some(cortex_peripherals)) =
         (hal::pac::Peripherals::take(), cortex_m::Peripherals::take())
     {
-        // initializing peripherals
+        // initializes peripherals
         let gpioa = peripherals.GPIOA.split();
         let gpiob = peripherals.GPIOB.split();
         let rcc = peripherals.RCC.constrain();
         let clocks = rcc.cfgr.sysclk(16.MHz()).freeze();
 
-        // initializing i2c
+        // initializes i2c
         let scl = gpiob.pb8.into_alternate::<4>().set_open_drain();
         let sda = gpiob.pb9.into_alternate::<4>().set_open_drain();
         let mut i2c = I2c::new(peripherals.I2C1, (scl, sda), 100_000.Hz(), &clocks);
 
-        // initializing uart
+        // initializes uart
         let tx = gpioa.pa2.into_alternate::<7>();
         let rx = gpioa.pa3.into_alternate::<7>();
         let mut serial: Serial<_, u8> = Serial::new(
@@ -71,9 +71,11 @@ pub fn run_bl() {
         */
 
         aht20_init(&mut sensor_data, &mut i2c, &mut serial, &mut delay);
-        aht20_measure(&mut sensor_data, &mut i2c, &mut serial, &mut delay);
-        aht20_uart_transmit_data(&mut sensor_data, &mut serial);
 
-        loop {}
+        loop {
+            aht20_measure(&mut sensor_data, &mut i2c, &mut serial, &mut delay);
+            aht20_uart_transmit_data(&mut sensor_data, &mut serial);
+            delay.delay_ms(1000);
+        }
     }
 }

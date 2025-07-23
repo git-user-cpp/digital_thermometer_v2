@@ -20,12 +20,11 @@
 #![no_main]
 #![no_std]
 
-use cortex_m_rt as rt;
-
 mod aht20;
 mod business_logic;
 mod utils;
 use business_logic::bl::run_bl;
+use cortex_m_rt as rt;
 
 #[rt::entry]
 fn main() -> ! {
