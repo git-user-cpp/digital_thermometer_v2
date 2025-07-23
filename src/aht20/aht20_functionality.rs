@@ -77,7 +77,12 @@ pub fn aht20_measure(
             match i2c.read(sensor_data.device_address, &mut sensor_data.measured_data) {
                 Ok(_) => {
                     if sensor_data.measured_data[0] & 0x80 == 0 {
+                        if aht20_check_crc(sensor_data) == sensor_data.measured_data[6] {
                         aht20_calculate_measurments(&mut sensor_data);
+                        } else {
+                            let msg = "AHT20 CRC check failed\r\n";
+                            let _ = serial.write_str(msg);
+                        }
                     } else {
                         let msg = "AHT20 Busy\r\n";
                         let _ = serial.write_str(msg);
@@ -158,4 +163,22 @@ fn aht20_soft_reset(i2c: &mut I2c<I2C1>, sensor_data: &mut Aht20Data, delay: &mu
         let _ = i2c.write(sensor_data.device_address, &soft_reset_cmd);
         delay.delay_ms(20_u32);
     }
+}
+
+// Helper function for checking crc
+fn aht20_check_crc(sensor_data: &mut Aht20Data) -> u8 {
+    let mut crc: u8 = 0xFF;
+
+    for &byte in sensor_data.measured_data.iter().take(6) {
+        crc ^= byte;
+        for _ in 0..8 {
+            if crc & 0x80 != 0 {
+                crc = (crc << 1) ^ 0x31;
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+
+    crc
 }
